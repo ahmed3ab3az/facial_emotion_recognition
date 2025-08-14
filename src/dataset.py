@@ -1,6 +1,16 @@
+import os
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def get_data_generators(train_dir="train/", test_dir="test/", img_size=(48, 48), batch_size=32):
+def get_data_generators(
+    base_data_dir="../data",  
+    train_folder="train",
+    test_folder="test",
+    img_size=(48, 48),
+    batch_size=32
+):
+    train_dir = os.path.join(base_data_dir, train_folder)
+    test_dir = os.path.join(base_data_dir, test_folder)
+
     # Training data with augmentation
     train_datagen = ImageDataGenerator(
         rescale=1./255,
@@ -9,7 +19,7 @@ def get_data_generators(train_dir="train/", test_dir="test/", img_size=(48, 48),
         height_shift_range=0.1,
         horizontal_flip=True,
         zoom_range=0.1,
-        validation_split=0.2  # 20% for validation
+        validation_split=0.2
     )
 
     # Test data without augmentation
