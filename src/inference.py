@@ -2,6 +2,7 @@ import tensorflow as tf
 import cv2
 import numpy as np
 import sys
+import argparse
 from src.dataset import get_data_generators  # to get class labels
 
 # Load model
@@ -77,8 +78,10 @@ def run_webcam():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        img_path = sys.argv[1]
-        predict_image(img_path)
+        parser = argparse.ArgumentParser(description="Facial Emotion Recognition Inference")
+        parser.add_argument("--image", type=str, required=True, help="Path to the image file")
+        args = parser.parse_args()
+        predict_image(args.image)
     else:
         print("Starting webcam. Press 'q' to quit.")
         run_webcam()
