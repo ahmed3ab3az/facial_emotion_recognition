@@ -2,6 +2,8 @@ import tensorflow as tf
 import cv2
 import numpy as np
 import sys
+import os
+import argparse
 from src.dataset import get_data_generators
 
 # Load trained model
@@ -19,15 +21,19 @@ def preprocess_face(face_img):
     """Resize and normalize the face for model prediction."""
     face_img = cv2.resize(face_img, (48, 48))
     face_img = face_img / 255.0
-    face_img = np.expand_dims(face_img, axis=(0, -1))
+    face_img = np.expand_dims(face_img, axis=(0, -1))  # shape: (1, 48, 48, 1)
     return face_img
 
 def process_video(video_path, output_path="output_demo.mp4"):
+    if not os.path.exists(video_path):
+        print(f"Error: Video file '{video_path}' not found.")
+        return
+
     cap = cv2.VideoCapture(video_path)
 
     # Video writer setup
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    fps = cap.get(cv2.CAP_PROP_FPS)
+    fps = cap.get(cv2.CAP_PROP_FPS) or 25  # default to 25 if fps=0
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
@@ -43,11 +49,11 @@ def process_video(video_path, output_path="output_demo.mp4"):
         for (x, y, w, h) in faces:
             face_img = gray[y:y+h, x:x+w]
             preprocessed = preprocess_face(face_img)
-            prediction = model.predict(preprocessed)
+            prediction = model.predict(preprocessed, verbose=0)
             class_idx = np.argmax(prediction)
             emotion = class_labels[class_idx]
 
-            # Draw on frame
+            # Draw bounding box & label
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
             cv2.putText(frame, emotion, (x, y-10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
@@ -59,9 +65,9 @@ def process_video(video_path, output_path="output_demo.mp4"):
     print(f"Processed video saved at {output_path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python demo_video.py path/to/video.mp4")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Facial Emotion Recognition on Video")
+    parser.add_argument("--video", type=str, required=True, help="Path to input video file")
+    parser.add_argument("--output", type=str, default="output_demo.mp4", help="Path to save processed video")
+    args = parser.parse_args()
 
-    video_path = sys.argv[1]
-    process_video(video_path)
+    process_video(args.video, args.output)
