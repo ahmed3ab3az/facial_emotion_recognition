@@ -2,7 +2,7 @@ import os
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 def get_data_generators(
-    base_data_dir="../data",  
+    base_data_dir="./data",  
     train_folder="train",
     test_folder="test",
     img_size=(48, 48),

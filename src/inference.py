@@ -3,8 +3,11 @@ import cv2
 import numpy as np
 import sys
 import argparse
-from src.dataset import get_data_generators  # to get class labels
+from dataset import get_data_generators  # to get class labels
 
+##NO GPU 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # Load model
 MODEL_PATH = "models/best_vgg16_model.h5"
 model = tf.keras.models.load_model(MODEL_PATH)
